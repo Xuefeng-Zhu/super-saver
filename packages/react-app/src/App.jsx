@@ -6,6 +6,7 @@ import "./App.css";
 import { Row, Col, Button, Menu, Alert } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import Portis from "@portis/web3";
 import { useUserAddress } from "eth-hooks";
 import { formatEther, parseEther } from "@ethersproject/units";
 import {
@@ -21,7 +22,7 @@ import {
 import { Header, Account, Faucet, Ramp, Contract, GasGauge } from "./components";
 import { Transactor } from "./helpers";
 // import Hints from "./Hints";
-import { Hints, ExampleUI, Subgraph } from "./views";
+import { Hints, Main, Subgraph } from "./views";
 import { INFURA_ID, DAI_ADDRESS, DAI_ABI, NETWORK, NETWORKS } from "./constants";
 /*
     Welcome to 🏗 scaffold-eth !
@@ -69,6 +70,7 @@ function App(props) {
   const [injectedProvider, setInjectedProvider] = useState();
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
   const price = useExchangePrice(targetNetwork, mainnetProvider);
+  console.log(price);
 
   /* 🔥 This hook will get the price of Gas from ⛽️ EtherGasStation */
   const gasPrice = useGasPrice(targetNetwork, "fast");
@@ -88,17 +90,6 @@ function App(props) {
 
   // The transactor wraps transactions and provides notificiations
   const tx = Transactor(userProvider, gasPrice);
-
-  // Faucet Tx can be used to send funds from the faucet
-  const faucetTx = Transactor(localProvider, gasPrice);
-
-  // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
-  const yourLocalBalance = useBalance(localProvider, address);
-  if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
-
-  // Just plug in different 🛰 providers to get your balance on different chains:
-  const yourMainnetBalance = useBalance(mainnetProvider, address);
-  if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
 
   // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(localProvider);
@@ -120,12 +111,12 @@ function App(props) {
   //
 
   // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
-  console.log("🤗 purpose:", purpose);
+  // const purpose = useContractReader(readContracts, "YourContract", "purpose");
+  // console.log("🤗 purpose:", purpose);
 
   // 📟 Listen for broadcast events
-  const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
-  console.log("📟 SetPurpose events:", setPurposeEvents);
+  // const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  // console.log("📟 SetPurpose events:", setPurposeEvents);
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
@@ -148,15 +139,11 @@ function App(props) {
       {/* ✏️ Edit the header and change the title to your project name */}
       <Header />
       <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
-        <Account
-          web3Modal={web3Modal}
-          loadWeb3Modal={loadWeb3Modal}
-          logoutOfWeb3Modal={logoutOfWeb3Modal}
-        />
+        <Account web3Modal={web3Modal} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
       </div>
       <BrowserRouter>
         <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-        <Menu.Item key="/">
+          <Menu.Item key="/">
             <Link
               onClick={() => {
                 setRoute("/");
@@ -189,9 +176,12 @@ function App(props) {
         </Menu>
 
         <Switch>
+          <Route exact path="/">
+            <Main signer={userProvider.getSigner()} provider={localProvider} account={address} />
+          </Route>
           <Route exact path="/contract">
             <Contract
-              name="SuperSaver"
+              name="YourContract"
               signer={userProvider.getSigner()}
               provider={localProvider}
               address={address}
@@ -223,6 +213,12 @@ const web3Modal = new Web3Modal({
       package: WalletConnectProvider, // required
       options: {
         infuraId: INFURA_ID,
+      },
+    },
+    portis: {
+      package: Portis, // required
+      options: {
+        id: "62b6b4a0-e7e4-43d8-ad40-974ea75d1b3d", // required
       },
     },
   },

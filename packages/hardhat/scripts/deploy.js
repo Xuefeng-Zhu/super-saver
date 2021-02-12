@@ -11,25 +11,28 @@ const main = async () => {
   console.log('\n\n 📡 Deploying...\n');
 
   accounts = await web3.eth.getAccounts();
-  const superSaver = await SuperSaver.new();
-  console.log('deposit');
-  await superSaver.deposit(
-    '0x0000000000000000000000000000000000000000',
-    '100000000000000',
-    {
-      value: 100000000000000,
-    }
-  );
-  console.log('processDeposit');
-  await superSaver.processDeposit('0x0000000000000000000000000000000000000000');
+  // await deploy('YourContract');
 
-  console.log('redeem');
-  await superSaver.redeem(
-    '0x0000000000000000000000000000000000000000',
-    '90000000000000'
-  );
-  console.log('processRedeem');
-  await superSaver.processRedeem('0x0000000000000000000000000000000000000000');
+  const deployedSuperSaver = await deploy('SuperSaver');
+  // const superSaver = await SuperSaver.at(deployedSuperSaver.address);
+  // console.log('deposit');
+  // await superSaver.deposit(
+  //   '0x0000000000000000000000000000000000000000',
+  //   '100000000000000',
+  //   {
+  //     value: 100000000000000,
+  //   }
+  // );
+  // console.log('processDeposit');
+  // await superSaver.processDeposit('0x0000000000000000000000000000000000000000');
+
+  // console.log('redeem');
+  // await superSaver.redeem(
+  //   '0x0000000000000000000000000000000000000000',
+  //   '90000000000000'
+  // );
+  // console.log('processRedeem');
+  // await superSaver.processRedeem('0x0000000000000000000000000000000000000000');
 
   /*
   //If you want to send value to an address from the deployer
