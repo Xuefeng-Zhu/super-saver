@@ -51,7 +51,7 @@ export default function ProcessorTable({ provider, compoundTokens, contract, tx,
         return (
           <Popconfirm
             title={`Are you sure to process redeem for ${record.underlyingSymbol}?`}
-            onConfirm={() => processDeposit(record)}
+            onConfirm={() => processRedeem(record)}
             okText="Yes"
             cancelText="No"
           >

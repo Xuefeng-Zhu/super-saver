@@ -13,26 +13,32 @@ const main = async () => {
   accounts = await web3.eth.getAccounts();
   // await deploy('YourContract');
 
-  const deployedSuperSaver = await deploy('SuperSaver');
-  // const superSaver = await SuperSaver.at(deployedSuperSaver.address);
-  // console.log('deposit');
-  // await superSaver.deposit(
-  //   '0x0000000000000000000000000000000000000000',
-  //   '100000000000000',
-  //   {
-  //     value: 100000000000000,
-  //   }
-  // );
-  // console.log('processDeposit');
-  // await superSaver.processDeposit('0x0000000000000000000000000000000000000000');
+  // const deployedSuperSaver = await deploy('SuperSaver');
+  const superSaver = await SuperSaver.at(
+    '0x94a2C4DD1Be777debd23E9Be8A43e63B253c87d7'
+  );
+  let tx = await superSaver.deposit(
+    '0x0000000000000000000000000000000000000000',
+    '100000000000000',
+    {
+      value: 100000000000000,
+    }
+  );
+  console.log('deposit', tx);
+  tx = await superSaver.processDeposit(
+    '0x0000000000000000000000000000000000000000'
+  );
+  console.log('processDeposit', tx);
 
-  // console.log('redeem');
-  // await superSaver.redeem(
-  //   '0x0000000000000000000000000000000000000000',
-  //   '90000000000000'
-  // );
-  // console.log('processRedeem');
-  // await superSaver.processRedeem('0x0000000000000000000000000000000000000000');
+  tx = await superSaver.redeem(
+    '0x0000000000000000000000000000000000000000',
+    '90000000000000'
+  );
+  console.log('redeem', tx);
+  tx = await superSaver.processRedeem(
+    '0x0000000000000000000000000000000000000000'
+  );
+  console.log('processRedeem', tx);
 
   /*
   //If you want to send value to an address from the deployer
