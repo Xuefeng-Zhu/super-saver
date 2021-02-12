@@ -145,7 +145,7 @@ function Subgraph(props) {
             {data?<Table dataSource={data.purposes} columns={purposeColumns} rowKey={"id"} />:<Typography>{(loading?"Loading...":deployWarning)}</Typography>}
 
             <div style={{margin:32, height:400, border:"1px solid #888888", textAlign:'left'}}>
-              <GraphiQL fetcher={graphQLFetcher} docExplorerOpen={true} query={EXAMPLE_GRAPHQL}/>
+              <GraphiQL fetcher={graphQLFetcher} query={EXAMPLE_GRAPHQL}/>
             </div>
 
           </div>

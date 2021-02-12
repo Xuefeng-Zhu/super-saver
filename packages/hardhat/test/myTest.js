@@ -1,26 +1,30 @@
-const { ethers } = require("hardhat");
-const { use, expect } = require("chai");
-const { solidity } = require("ethereum-waffle");
+const { ethers } = require('hardhat');
+const { use, expect } = require('chai');
+const { solidity } = require('ethereum-waffle');
 
 use(solidity);
 
-describe("My Dapp", function () {
+describe('My Dapp', function (accounts) {
   let myContract;
 
-  describe("YourContract", function () {
-    it("Should deploy YourContract", async function () {
-      const YourContract = await ethers.getContractFactory("YourContract");
+  describe('SuperSaver', function () {
+    it('Should deploy SuperSaver', async function () {
+      const SuperSaver = await ethers.getContractFactory('SuperSaver');
+      const signers = await ethers.getSigners();
 
-      myContract = await YourContract.deploy();
-    });
+      // console.log(signers);
 
-    describe("setPurpose()", function () {
-      it("Should be able to set a new purpose", async function () {
-        const newPurpose = "Test Purpose";
+      myContract = await SuperSaver.deploy();
+      await myContract.deposit(
+        '0xd3a691c852cdb01e281545a27064741f0b7f6825',
+        '1'
+      );
 
-        await myContract.setPurpose(newPurpose);
-        expect(await myContract.purpose()).to.equal(newPurpose);
-      });
+      const profile = await myContract.userProfileByToken(
+        '0xd3a691c852cdb01e281545a27064741f0b7f6825',
+        signers[0].address
+      );
+      console.log(profile.toString());
     });
   });
 });

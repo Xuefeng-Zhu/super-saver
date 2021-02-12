@@ -1,24 +1,35 @@
 /* eslint no-use-before-define: "warn" */
-const fs = require("fs");
-const chalk = require("chalk");
-const { config, ethers } = require("hardhat");
-const { utils } = require("ethers");
-const R = require("ramda");
+const fs = require('fs');
+const chalk = require('chalk');
+const { config, ethers } = require('hardhat');
+const { utils } = require('ethers');
+const R = require('ramda');
+
+const SuperSaver = artifacts.require('SuperSaver');
 
 const main = async () => {
+  console.log('\n\n 📡 Deploying...\n');
 
-  console.log("\n\n 📡 Deploying...\n");
+  accounts = await web3.eth.getAccounts();
+  const superSaver = await SuperSaver.new();
+  console.log('deposit');
+  await superSaver.deposit(
+    '0x0000000000000000000000000000000000000000',
+    '100000000000000',
+    {
+      value: 100000000000000,
+    }
+  );
+  console.log('processDeposit');
+  await superSaver.processDeposit('0x0000000000000000000000000000000000000000');
 
-
-  const yourContract = await deploy("YourContract") // <-- add in constructor args like line 19 vvvv
-
-  //const secondContract = await deploy("SecondContract")
-
-  // const exampleToken = await deploy("ExampleToken")
-  // const examplePriceOracle = await deploy("ExamplePriceOracle")
-  // const smartContractWallet = await deploy("SmartContractWallet",[exampleToken.address,examplePriceOracle.address])
-
-
+  console.log('redeem');
+  await superSaver.redeem(
+    '0x0000000000000000000000000000000000000000',
+    '90000000000000'
+  );
+  console.log('processRedeem');
+  await superSaver.processRedeem('0x0000000000000000000000000000000000000000');
 
   /*
   //If you want to send value to an address from the deployer
@@ -29,15 +40,6 @@ const main = async () => {
   })
   */
 
-
-  /*
-  //If you want to send some ETH to a contract on deploy (make your constructor payable!)
-  const yourContract = await deploy("YourContract", [], {
-  value: ethers.utils.parseEther("0.05")
-  });
-  */
-
-
   /*
   //If you want to link a library into your contract:
   // reference: https://github.com/austintgriffith/scaffold-eth/blob/using-libraries-example/packages/hardhat/scripts/deploy.js#L19
@@ -46,28 +48,34 @@ const main = async () => {
   });
   */
 
-
   console.log(
-    " 💾  Artifacts (address, abi, and args) saved to: ",
-    chalk.blue("packages/hardhat/artifacts/"),
-    "\n\n"
+    ' 💾  Artifacts (address, abi, and args) saved to: ',
+    chalk.blue('packages/hardhat/artifacts/'),
+    '\n\n'
   );
 };
 
-const deploy = async (contractName, _args = [], overrides = {}, libraries = {}) => {
+const deploy = async (
+  contractName,
+  _args = [],
+  overrides = {},
+  libraries = {}
+) => {
   console.log(` 🛰  Deploying: ${contractName}`);
 
   const contractArgs = _args || [];
-  const contractArtifacts = await ethers.getContractFactory(contractName,{libraries: libraries});
+  const contractArtifacts = await ethers.getContractFactory(contractName, {
+    libraries: libraries,
+  });
   const deployed = await contractArtifacts.deploy(...contractArgs, overrides);
   const encoded = abiEncodeArgs(deployed, contractArgs);
   fs.writeFileSync(`artifacts/${contractName}.address`, deployed.address);
 
   console.log(
-    " 📄",
+    ' 📄',
     chalk.cyan(contractName),
-    "deployed to:",
-    chalk.magenta(deployed.address),
+    'deployed to:',
+    chalk.magenta(deployed.address)
   );
 
   if (!encoded || encoded.length <= 2) return deployed;
@@ -75,7 +83,6 @@ const deploy = async (contractName, _args = [], overrides = {}, libraries = {}) 
 
   return deployed;
 };
-
 
 // ------ utils -------
 
@@ -87,9 +94,9 @@ const abiEncodeArgs = (deployed, contractArgs) => {
   if (
     !contractArgs ||
     !deployed ||
-    !R.hasPath(["interface", "deploy"], deployed)
+    !R.hasPath(['interface', 'deploy'], deployed)
   ) {
-    return "";
+    return '';
   }
   const encoded = utils.defaultAbiCoder.encode(
     deployed.interface.deploy.inputs,
@@ -100,7 +107,9 @@ const abiEncodeArgs = (deployed, contractArgs) => {
 
 // checks if it is a Solidity file
 const isSolidity = (fileName) =>
-  fileName.indexOf(".sol") >= 0 && fileName.indexOf(".swp") < 0 && fileName.indexOf(".swap") < 0;
+  fileName.indexOf('.sol') >= 0 &&
+  fileName.indexOf('.swp') < 0 &&
+  fileName.indexOf('.swap') < 0;
 
 const readArgsFile = (contractName) => {
   let args = [];
@@ -115,7 +124,7 @@ const readArgsFile = (contractName) => {
 };
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 main()
