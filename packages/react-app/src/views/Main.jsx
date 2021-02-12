@@ -57,11 +57,9 @@ export default function Main({ provider, signer, account, subgraphUri }) {
     const tokenIcons = _.mapKeys(res.data.tokens, token => token.symbol);
 
     res = await axios.post(subgraphUri, { query: QUERY_TOKEN_PROFILE });
-    console.log(res);
     const tokenBalances = _.mapKeys(res.data.data.tokenProfiles, profile => profile.id);
 
     res = await axios.post(subgraphUri, { query: getUserTokenProfilesQuery(account) });
-    console.log(res, account);
     _.forEach(_.get(res, "data.data.userTokenProfiles"), profile => {
       tokenBalances[profile.token] = {
         ...tokenBalances[profile.token],
@@ -84,7 +82,9 @@ export default function Main({ provider, signer, account, subgraphUri }) {
   }, [setCompoundTokens, account]);
 
   useEffect(() => {
-    loadData();
+    setInterval(() => {
+      loadData();
+    }, 5000);
   }, [loadData, account]);
 
   return (

@@ -143,7 +143,7 @@ function App(props) {
       </div>
       <BrowserRouter>
         <Switch>
-          <Route exact path="/">
+          <Route path="/">
             <Main
               signer={userProvider.getSigner()}
               provider={localProvider}
