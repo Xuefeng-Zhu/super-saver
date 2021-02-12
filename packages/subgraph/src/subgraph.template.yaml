@@ -3,23 +3,31 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourContract
-    network: localhost
+    name: SuperSaver
+    network: kovan
     source:
-      address: '{{YourContractAddress}}'
-      abi: YourContract
-      startBlock: 1
+      address: '{{SuperSaverAddress}}'
+      abi: SuperSaver
+      startBlock: 23433387
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Purpose
-        - Sender
+        - Deposit
+        - ProcessDeposit
+        - ProcessRedeem
+        - Redeem
       abis:
-        - name: YourContract
-          file: ./abis/YourContract.json
+        - name: SuperSaver
+          file: ./abis/SuperSaver.json
       eventHandlers:
-        - event: SetPurpose(address,string)
-          handler: handleSetPurpose
+        - event: Deposit(indexed address,indexed address,uint256)
+          handler: handleDeposit
+        - event: ProcessDeposit(indexed address)
+          handler: handleProcessDeposit
+        - event: ProcessRedeem(indexed address)
+          handler: handleProcessRedeem
+        - event: Redeem(indexed address,indexed address,uint256)
+          handler: handleRedeem
       file: ./src/mapping.ts

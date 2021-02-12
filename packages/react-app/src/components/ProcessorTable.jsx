@@ -55,7 +55,7 @@ export default function ProcessorTable({ provider, compoundTokens, contract, tx,
             okText="Yes"
             cancelText="No"
           >
-            {formatEther(record.processRedeem || "0")}
+            {formatEther(record.pendingRedeem || "0")}
           </Popconfirm>
         );
       },

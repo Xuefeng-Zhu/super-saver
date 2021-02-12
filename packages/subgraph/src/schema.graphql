@@ -1,15 +1,14 @@
-type Purpose @entity {
+type UserTokenProfile @entity {
   id: ID!
-  sender: Sender!
-  purpose: String!
-  createdAt: BigInt!
-  transactionHash: String!
+  sender: Bytes!
+  token: Bytes!
+  pending: BigInt!
+  locked: BigInt!
+  redeem: BigInt!
 }
 
-type Sender @entity {
+type TokenProfile @entity {
   id: ID!
-  address: Bytes!
-  purposes: [Purpose!] @derivedFrom(field: "sender")
-  createdAt: BigInt!
-  purposeCount: BigInt!
+  pendingDeposit: BigInt!
+  pendingRedeem: BigInt!
 }

@@ -57,7 +57,7 @@ module.exports = {
       },
     },
     kovan: {
-      url: 'https://kovan.infura.io/v3/14ae9c245808440cb471b5f4995c02ef', // <---- YOUR INFURA ID! (or it won't work)
+      url: 'https://kovan.infura.io/v3/cefc104f74584ff29a67d9ec61327e45', // <---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },

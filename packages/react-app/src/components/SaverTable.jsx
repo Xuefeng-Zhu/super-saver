@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import _ from "lodash";
 import { Card, Table, Modal, Tabs, Input, Descriptions } from "antd";
+import { parseEther, formatEther, parseUnits } from "@ethersproject/units";
 import axios from "axios";
-import { parseEther, formatEther } from "@ethersproject/units";
 
 const { TabPane } = Tabs;
 
@@ -23,10 +23,19 @@ const columns = [
   },
   {
     title: "APY",
-    dataIndex: "supplyRate",
-    key: "supplyRate",
+    key: "apy",
     render: (text, record) => {
       return `${(record.supplyRate * 100).toFixed(2)}%`;
+    },
+  },
+  {
+    title: "Balance",
+    key: "balance",
+    render: (text, record) => {
+      const pending = parseUnits(record.pending || "0", "wei");
+      const redeem = parseUnits(record.redeem || "0", "wei");
+
+      return formatEther(pending.sub(redeem));
     },
   },
 ];
@@ -36,11 +45,11 @@ export default function SaverTable({ provider, compoundTokens, contract, tx, acc
   const [selectedTab, setSelectedTab] = useState("deposit");
   const [profile, setProfile] = useState();
   const [amount, setAmount] = useState();
-  const refresh = useCallback(async () => {
+
+  const loadUserTokenProfile = useCallback(async () => {
     try {
-      console.log(contract);
       const profile = await contract.userProfileByToken(selectedToken.underlyingAddress, account);
-      console.log(profile);
+      console.log(selectedToken.underlyingAddress, account, profile);
 
       setProfile(profile);
     } catch (e) {
@@ -49,8 +58,8 @@ export default function SaverTable({ provider, compoundTokens, contract, tx, acc
   }, [setProfile, selectedToken]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh, selectedToken]);
+    loadUserTokenProfile();
+  }, [loadUserTokenProfile, selectedToken]);
 
   const handleOk = async () => {
     const overrides = {};

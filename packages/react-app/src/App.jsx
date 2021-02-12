@@ -142,42 +142,14 @@ function App(props) {
         <Account web3Modal={web3Modal} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
       </div>
       <BrowserRouter>
-        <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-          <Menu.Item key="/">
-            <Link
-              onClick={() => {
-                setRoute("/");
-              }}
-              to="/"
-            >
-              Main
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/contract">
-            <Link
-              onClick={() => {
-                setRoute("/contract");
-              }}
-              to="/conctract"
-            >
-              YourContract
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="/subgraph">
-            <Link
-              onClick={() => {
-                setRoute("/subgraph");
-              }}
-              to="/subgraph"
-            >
-              Subgraph
-            </Link>
-          </Menu.Item>
-        </Menu>
-
         <Switch>
           <Route exact path="/">
-            <Main signer={userProvider.getSigner()} provider={localProvider} account={address} />
+            <Main
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              account={address}
+              subgraphUri={props.subgraphUri}
+            />
           </Route>
           <Route exact path="/contract">
             <Contract
@@ -190,7 +162,7 @@ function App(props) {
           </Route>
           <Route path="/subgraph">
             <Subgraph
-              subgraphUri={"https://api.thegraph.com/subgraphs/name/graphprotocol/compound-v2"}
+              subgraphUri={props.subgraphUri}
               tx={tx}
               writeContracts={writeContracts}
               mainnetProvider={mainnetProvider}

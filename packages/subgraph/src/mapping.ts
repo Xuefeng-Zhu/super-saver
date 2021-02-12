@@ -1,34 +1,94 @@
-import { BigInt, Address } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import {
-  YourContract,
-  SetPurpose
-} from "../generated/YourContract/YourContract"
-import { Purpose, Sender } from "../generated/schema"
+  SuperSaver,
+  Deposit,
+  ProcessDeposit,
+  ProcessRedeem,
+  Redeem,
+} from '../generated/SuperSaver/SuperSaver';
+import { UserTokenProfile, TokenProfile } from '../generated/schema';
 
-export function handleSetPurpose(event: SetPurpose): void {
+const ZERO = new BigInt(0);
 
-  let senderString = event.params.sender.toHexString()
+export function handleDeposit(event: Deposit): void {
+  let token = event.params.token;
+  let sender = event.params.sender;
+  let id = token.toHex() + sender.toHex();
 
-  let sender = Sender.load(senderString)
+  let userTokenProfile = UserTokenProfile.load(id);
 
-  if (sender == null) {
-    sender = new Sender(senderString)
-    sender.address = event.params.sender
-    sender.createdAt = event.block.timestamp
-    sender.purposeCount = BigInt.fromI32(1)
+  if (userTokenProfile == null) {
+    userTokenProfile = new UserTokenProfile(id);
+
+    userTokenProfile.sender = sender;
+    userTokenProfile.token = token;
+    userTokenProfile.pending = ZERO;
+    userTokenProfile.locked = ZERO;
+    userTokenProfile.redeem = ZERO;
   }
-  else {
-    sender.purposeCount = sender.purposeCount.plus(BigInt.fromI32(1))
+
+  let tokenProfile = TokenProfile.load(token.toHex());
+
+  if (tokenProfile == null) {
+    tokenProfile = new TokenProfile(token.toHex());
+
+    tokenProfile.pendingDeposit = ZERO;
+    tokenProfile.pendingRedeem = ZERO;
   }
 
-  let purpose = new Purpose(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  userTokenProfile.pending = userTokenProfile.pending.plus(event.params.amount);
+  tokenProfile.pendingDeposit = tokenProfile.pendingDeposit.plus(
+    event.params.amount
+  );
 
-  purpose.purpose = event.params.purpose
-  purpose.sender = senderString
-  purpose.createdAt = event.block.timestamp
-  purpose.transactionHash = event.transaction.hash.toHex()
+  userTokenProfile.save();
+  tokenProfile.save();
+}
 
-  purpose.save()
-  sender.save()
+export function handleProcessDeposit(event: ProcessDeposit): void {
+  let token = event.params.token;
 
+  let tokenProfile = TokenProfile.load(token.toHex());
+  if (tokenProfile == null) {
+    return;
+  }
+
+  tokenProfile.pendingDeposit = ZERO;
+  tokenProfile.save();
+}
+
+export function handleProcessRedeem(event: ProcessRedeem): void {
+  let token = event.params.token;
+
+  let tokenProfile = TokenProfile.load(token.toHex());
+  if (tokenProfile == null) {
+    return;
+  }
+
+  tokenProfile.pendingRedeem = ZERO;
+  tokenProfile.save();
+}
+
+export function handleRedeem(event: Redeem): void {
+  let token = event.params.token;
+  let sender = event.params.sender;
+  let id = token.toHex() + sender.toHex();
+
+  let userTokenProfile = UserTokenProfile.load(id);
+  if (userTokenProfile == null) {
+    return;
+  }
+
+  let tokenProfile = TokenProfile.load(token.toHex());
+  if (tokenProfile == null) {
+    return;
+  }
+
+  userTokenProfile.redeem = userTokenProfile.redeem.plus(event.params.amount);
+  tokenProfile.pendingRedeem = tokenProfile.pendingRedeem.plus(
+    event.params.amount
+  );
+
+  userTokenProfile.save();
+  tokenProfile.save();
 }

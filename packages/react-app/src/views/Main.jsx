@@ -27,7 +27,26 @@ const QUERY_COMPOUND_TOKENS = `
   }
 } `;
 
-export default function Main({ provider, signer, account }) {
+const QUERY_TOKEN_PROFILE = `
+{
+  tokenProfiles {
+    id
+    pendingDeposit
+    pendingRedeem
+  }
+} `;
+
+const getUserTokenProfilesQuery = sender => `
+{
+  userTokenProfiles(where: { sender: "${sender}" }) {
+    token
+    pending
+    locked
+    redeem
+  }
+}`;
+
+export default function Main({ provider, signer, account, subgraphUri }) {
   const [compoundTokens, setCompoundTokens] = useState([]);
   const contracts = useContractLoader(provider);
   const contract = contracts && contracts["SuperSaver"].connect(signer);
@@ -36,18 +55,37 @@ export default function Main({ provider, signer, account }) {
   const loadData = useCallback(async () => {
     let res = await axios.get(`${INCH_API}/tokens`);
     const tokenIcons = _.mapKeys(res.data.tokens, token => token.symbol);
+
+    res = await axios.post(subgraphUri, { query: QUERY_TOKEN_PROFILE });
+    console.log(res);
+    const tokenBalances = _.mapKeys(res.data.data.tokenProfiles, profile => profile.id);
+
+    res = await axios.post(subgraphUri, { query: getUserTokenProfilesQuery(account) });
+    console.log(res, account);
+    _.forEach(_.get(res, "data.data.userTokenProfiles"), profile => {
+      tokenBalances[profile.token] = {
+        ...tokenBalances[profile.token],
+        ...profile,
+      };
+    });
+
     res = await axios.post(COMPOUND_SUBGRAPH, { query: QUERY_COMPOUND_TOKENS });
     setCompoundTokens(
       _.map(res.data.data.markets, market => {
         market.icon = tokenIcons[market.underlyingSymbol].logoURI;
-        return market;
+        const tokenBalance = tokenBalances[market.underlyingAddress];
+
+        return {
+          ...market,
+          ...tokenBalance,
+        };
       }),
     );
-  }, [setCompoundTokens]);
+  }, [setCompoundTokens, account]);
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, [loadData, account]);
 
   return (
     <div>
@@ -59,6 +97,7 @@ export default function Main({ provider, signer, account }) {
             contract={contract}
             tx={tx}
             account={account}
+            subgraphUri={subgraphUri}
           />
         </Col>
         <Col span={12}>
@@ -68,6 +107,7 @@ export default function Main({ provider, signer, account }) {
             contract={contract}
             tx={tx}
             account={account}
+            subgraphUri={subgraphUri}
           />
         </Col>
       </Row>
